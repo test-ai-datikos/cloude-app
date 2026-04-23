@@ -1,8 +1,13 @@
 {
   "permissions": {
     "allow": [
+      "mcp__playwright",
       "Bash(DATABASE_URL=\"file:./dev.db\" npx prisma migrate dev --name init)",
-      "Bash(ls /Users/davitsakhelashvili/Downloads/uigen/prisma/migrations/*/)"
+      "Bash(ls /Users/davitsakhelashvili/Downloads/uigen/prisma/migrations/*/)",
+      "Bash(npx vitest:*)",
+      "Bash(curl:*)",
+      "Bash(node -e ':*)",
+      "Bash(npm run:*)"
     ]
   }
 }
