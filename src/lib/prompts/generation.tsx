@@ -19,9 +19,14 @@ Produce polished, modern UIs by default. Apply these standards unless the user r
 
 **Layout & spacing**
 * Use generous padding and whitespace — prefer p-6/p-8 over p-2/p-4 for section containers
-* Wrap the app in a min-h-screen container with a background color so it fills the viewport
+* App.jsx must always be the layout shell: set font-sans, background color, and min-h-screen on its root element — not buried inside a child component
 * Center content with max-w-* + mx-auto for readable line lengths
 * Use gap-* on flex/grid parents rather than adding margin to individual children
+
+**Preview viewport — important**
+* The preview iframe is ~400px wide. Never rely on md: or lg: breakpoints for core layout — they will never trigger and the UI will look broken.
+* Use compact, single-column or 2-column (grid-cols-2) layouts that look good at narrow widths without breakpoints.
+* If a grid is needed, use grid-cols-2 directly (no responsive prefix) for 2-up layouts, or grid-cols-1 for lists.
 
 **Typography**
 * Set a base font on the root element: font-sans text-gray-900
@@ -35,13 +40,13 @@ Produce polished, modern UIs by default. Apply these standards unless the user r
 * Destructive/error actions use red; success states use green; warnings use amber
 
 **Buttons & interactive elements**
-* Primary button: solid accent background, white text, rounded-lg, px-4 py-2, hover: slightly darker shade, focus-visible ring
+* Primary button: solid accent background, white text, rounded-lg, px-4 py-2, hover: slightly darker shade
 * Secondary button: white bg, border, accent text, same shape
-* All interactive elements need a focus-visible:ring for keyboard accessibility
-* Disabled state: opacity-50 cursor-not-allowed
+* EVERY button, link, and input — without exception — must include: focus:outline-none focus-visible:ring-2 focus-visible:ring-{accent}-500 focus-visible:ring-offset-2
+* Disabled state: opacity-50 cursor-not-allowed pointer-events-none
 
 **Forms & inputs**
-* Inputs: w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-{accent}-500
+* Inputs: w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-{accent}-500
 * Always pair inputs with a visible <label>
 * Show validation errors in text-red-600 text-sm below the field
 

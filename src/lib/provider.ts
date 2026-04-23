@@ -41,19 +41,6 @@ export class MockLanguageModel implements LanguageModelV1 {
     return "";
   }
 
-  private getLastToolResult(messages: LanguageModelV1Message[]): any {
-    // Find the last tool message
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === "tool") {
-        const content = messages[i].content;
-        if (Array.isArray(content) && content.length > 0) {
-          return content[0];
-        }
-      }
-    }
-    return null;
-  }
-
   private async *generateMockStream(
     messages: LanguageModelV1Message[],
     userPrompt: string
@@ -72,6 +59,34 @@ export class MockLanguageModel implements LanguageModelV1 {
     } else if (promptLower.includes("card")) {
       componentType = "card";
       componentName = "Card";
+    } else if (
+      promptLower.includes("sidebar") ||
+      promptLower.includes("menu") ||
+      promptLower.includes("nav")
+    ) {
+      componentType = "sidebar";
+      componentName = "Sidebar";
+    } else if (
+      promptLower.includes("table") ||
+      promptLower.includes("list") ||
+      promptLower.includes("data")
+    ) {
+      componentType = "table";
+      componentName = "DataTable";
+    } else if (
+      promptLower.includes("dashboard") ||
+      promptLower.includes("stat") ||
+      promptLower.includes("metric")
+    ) {
+      componentType = "dashboard";
+      componentName = "Dashboard";
+    } else if (
+      promptLower.includes("profile") ||
+      promptLower.includes("avatar") ||
+      promptLower.includes("user")
+    ) {
+      componentType = "profile";
+      componentName = "ProfileCard";
     }
 
     // Step 1: Create component file
@@ -324,6 +339,228 @@ const Card = ({
 
 export default Card;`;
 
+      case "sidebar":
+        return `import { useState } from 'react';
+
+const navItems = [
+  { icon: '⊞', label: 'Dashboard', href: '#', active: true },
+  { icon: '📊', label: 'Analytics', href: '#' },
+  { icon: '📁', label: 'Projects', href: '#' },
+  { icon: '👥', label: 'Team', href: '#' },
+  { icon: '📅', label: 'Calendar', href: '#' },
+  { icon: '⚙️', label: 'Settings', href: '#' },
+];
+
+const Sidebar = () => {
+  const [active, setActive] = useState('Dashboard');
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <aside className={\`flex flex-col bg-white border-r border-gray-200 font-sans transition-all duration-200 \${collapsed ? 'w-16' : 'w-60'}\`}>
+      <div className="flex items-center justify-between px-4 py-5 border-b border-gray-100">
+        {!collapsed && (
+          <span className="text-base font-semibold text-gray-900 truncate">Workspace</span>
+        )}
+        <button
+          onClick={() => setCollapsed(c => !c)}
+          className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors duration-150 ml-auto"
+          aria-label="Toggle sidebar"
+        >
+          {collapsed ? '→' : '←'}
+        </button>
+      </div>
+
+      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+        {navItems.map(({ icon, label, href }) => (
+          <a
+            key={label}
+            href={href}
+            onClick={e => { e.preventDefault(); setActive(label); }}
+            className={\`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-indigo-500 \${
+              active === label
+                ? 'bg-indigo-50 text-indigo-700'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+            }\`}
+          >
+            <span className="text-base shrink-0">{icon}</span>
+            {!collapsed && <span className="truncate">{label}</span>}
+          </a>
+        ))}
+      </nav>
+
+      <div className="px-2 py-3 border-t border-gray-100">
+        <div className={\`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors duration-150 \${collapsed ? 'justify-center' : ''}\`}>
+          <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0">
+            JD
+          </div>
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">Jane Doe</p>
+              <p className="text-xs text-gray-500 truncate">jane@example.com</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;`;
+
+      case "table":
+        return `import { useState } from 'react';
+
+const people = [
+  { id: 1, name: 'Alice Johnson', role: 'Engineer', status: 'Active', joined: 'Jan 2023' },
+  { id: 2, name: 'Bob Smith', role: 'Designer', status: 'Active', joined: 'Mar 2023' },
+  { id: 3, name: 'Carol White', role: 'Manager', status: 'Away', joined: 'Nov 2022' },
+  { id: 4, name: 'Dan Brown', role: 'Engineer', status: 'Inactive', joined: 'Jul 2023' },
+  { id: 5, name: 'Eva Green', role: 'Marketing', status: 'Active', joined: 'Feb 2024' },
+];
+
+const statusColors = {
+  Active: 'bg-green-100 text-green-700',
+  Away: 'bg-amber-100 text-amber-700',
+  Inactive: 'bg-gray-100 text-gray-500',
+};
+
+const DataTable = () => {
+  const [search, setSearch] = useState('');
+
+  const filtered = people.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.role.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden font-sans">
+      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base font-semibold text-gray-900">Team Members</h2>
+          <p className="text-sm text-gray-500">{filtered.length} people</p>
+        </div>
+        <input
+          type="search"
+          placeholder="Search…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 w-48"
+        />
+      </div>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-gray-100 bg-gray-50 text-left">
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Name</th>
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Role</th>
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+            <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Joined</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {filtered.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="px-6 py-10 text-center text-gray-400">No results found</td>
+            </tr>
+          ) : filtered.map(person => (
+            <tr key={person.id} className="hover:bg-gray-50 transition-colors duration-100">
+              <td className="px-6 py-3 font-medium text-gray-900">{person.name}</td>
+              <td className="px-6 py-3 text-gray-500">{person.role}</td>
+              <td className="px-6 py-3">
+                <span className={\`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium \${statusColors[person.status]}\`}>
+                  {person.status}
+                </span>
+              </td>
+              <td className="px-6 py-3 text-gray-500">{person.joined}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default DataTable;`;
+
+      case "dashboard":
+        return `const stats = [
+  { label: 'Total Revenue', value: '$48,295', change: '+12%', up: true },
+  { label: 'Active Users', value: '3,842', change: '+5%', up: true },
+  { label: 'Bounce Rate', value: '24.6%', change: '-3%', up: false },
+  { label: 'Avg. Session', value: '4m 32s', change: '+8%', up: true },
+];
+
+const Dashboard = () => (
+  <div className="space-y-6 font-sans">
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
+      <p className="text-sm text-gray-500 mt-0.5">Last 30 days</p>
+    </div>
+
+    <div className="grid grid-cols-2 gap-4">
+      {stats.map(({ label, value, change, up }) => (
+        <div key={label} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+          <p className="text-sm text-gray-500 mb-1">{label}</p>
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className={\`text-xs font-medium mt-1 \${up ? 'text-green-600' : 'text-red-500'}\`}>
+            {change} vs last month
+          </p>
+        </div>
+      ))}
+    </div>
+
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+      <h2 className="text-sm font-semibold text-gray-900 mb-4">Activity</h2>
+      <div className="flex items-end gap-1.5 h-24">
+        {[40, 65, 45, 80, 55, 90, 70, 85, 60, 75, 95, 50].map((h, i) => (
+          <div key={i} className="flex-1 bg-indigo-100 rounded-t hover:bg-indigo-400 transition-colors duration-150" style={{ height: \`\${h}%\` }} />
+        ))}
+      </div>
+      <div className="flex justify-between text-xs text-gray-400 mt-2">
+        <span>Jan</span><span>Jun</span><span>Dec</span>
+      </div>
+    </div>
+  </div>
+);
+
+export default Dashboard;`;
+
+      case "profile":
+        return `const ProfileCard = ({
+  name = "Jane Doe",
+  role = "Senior Product Designer",
+  location = "San Francisco, CA",
+  bio = "Crafting intuitive digital experiences for over 8 years. Passionate about design systems and accessibility.",
+  stats = [{ label: 'Projects', value: '42' }, { label: 'Followers', value: '1.2k' }, { label: 'Following', value: '180' }],
+}) => (
+  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden font-sans max-w-sm">
+    <div className="h-24 bg-gradient-to-r from-indigo-500 to-violet-500" />
+    <div className="px-6 pb-6">
+      <div className="-mt-10 mb-4 flex items-end justify-between">
+        <div className="w-20 h-20 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-2xl font-bold border-4 border-white shadow-sm">
+          {name.split(' ').map(n => n[0]).join('')}
+        </div>
+        <button className="px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 transition-colors duration-150">
+          Follow
+        </button>
+      </div>
+      <h2 className="text-lg font-semibold text-gray-900">{name}</h2>
+      <p className="text-sm text-indigo-600 font-medium">{role}</p>
+      <p className="text-xs text-gray-500 mt-0.5">📍 {location}</p>
+      <p className="text-sm text-gray-600 mt-3 leading-relaxed">{bio}</p>
+      <div className="mt-5 grid grid-cols-3 divide-x divide-gray-100 border border-gray-100 rounded-xl overflow-hidden">
+        {stats.map(({ label, value }) => (
+          <div key={label} className="py-3 text-center">
+            <p className="text-base font-bold text-gray-900">{value}</p>
+            <p className="text-xs text-gray-500">{label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+export default ProfileCard;`;
+
       default:
         return `import { useState } from 'react';
 
@@ -389,6 +626,64 @@ export default Counter;`;
   }
 
   private getAppCode(componentName: string): string {
+    if (componentName === "Sidebar") {
+      return `import Sidebar from '@/components/Sidebar';
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex font-sans">
+      <Sidebar />
+      <main className="flex-1 p-8">
+        <div className="max-w-2xl">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Page Content</h1>
+          <p className="text-gray-500">Select an item from the sidebar to get started.</p>
+        </div>
+      </main>
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "DataTable") {
+      return `import DataTable from '@/components/DataTable';
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-slate-50 p-8 font-sans">
+      <div className="max-w-3xl mx-auto">
+        <DataTable />
+      </div>
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "Dashboard") {
+      return `import Dashboard from '@/components/Dashboard';
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-slate-50 p-8 font-sans">
+      <div className="max-w-xl mx-auto">
+        <Dashboard />
+      </div>
+    </div>
+  );
+}`;
+    }
+
+    if (componentName === "ProfileCard") {
+      return `import ProfileCard from '@/components/ProfileCard';
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8 font-sans">
+      <ProfileCard />
+    </div>
+  );
+}`;
+    }
+
     if (componentName === "Card") {
       return `import Card from '@/components/Card';
 
