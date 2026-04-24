@@ -11,19 +11,21 @@ import { AlertCircle } from "lucide-react";
 export function PreviewFrame() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { getAllFiles, refreshTrigger } = useFileSystem();
-  const [error, setError] = useState<string | null>(null);
+  // Initialize error based on whether files already exist to avoid an initial
+  // white-flash before the welcome screen appears.
+  const [error, setError] = useState<string | null>(() => {
+    const initialFiles = getAllFiles();
+    return initialFiles.size === 0 ? "firstLoad" : null;
+  });
   const [entryPoint, setEntryPoint] = useState<string>("/App.jsx");
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  // Use a ref instead of state so that updating it does not trigger the effect
+  // to re-run (which would cause the iframe srcdoc to be rebuilt unnecessarily).
+  const isFirstLoadRef = useRef(true);
 
   useEffect(() => {
     const updatePreview = () => {
       try {
         const files = getAllFiles();
-
-        // Clear error first when we have files
-        if (files.size > 0 && error) {
-          setError(null);
-        }
 
         // Find the entry point - look for App.jsx, App.tsx, index.jsx, or index.tsx
         let foundEntryPoint = entryPoint;
@@ -54,7 +56,7 @@ export function PreviewFrame() {
         }
 
         if (files.size === 0) {
-          if (isFirstLoad) {
+          if (isFirstLoadRef.current) {
             setError("firstLoad");
           } else {
             setError("No files to preview");
@@ -63,9 +65,7 @@ export function PreviewFrame() {
         }
 
         // We have files, so it's no longer the first load
-        if (isFirstLoad) {
-          setIsFirstLoad(false);
-        }
+        isFirstLoadRef.current = false;
 
         if (!foundEntryPoint || !files.has(foundEntryPoint)) {
           setError(
@@ -96,7 +96,11 @@ export function PreviewFrame() {
     };
 
     updatePreview();
-  }, [refreshTrigger, getAllFiles, entryPoint, error, isFirstLoad]);
+  // error and isFirstLoad intentionally omitted: both are mutated inside this
+  // effect. Including them would cause the effect (and the iframe rebuild) to
+  // run again every time error/isFirstLoad change — producing a visible flicker.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshTrigger, getAllFiles, entryPoint]);
 
   if (error) {
     if (error === "firstLoad") {
