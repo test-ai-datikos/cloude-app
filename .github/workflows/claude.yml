@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      DATABASE_URL: file:./prisma/dev.db
     permissions:
       contents: read
       pull-requests: read
