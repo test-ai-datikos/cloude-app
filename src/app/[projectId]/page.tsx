@@ -1,7 +1,12 @@
+import dynamic from "next/dynamic";
 import { getUser } from "@/actions";
 import { getProject } from "@/actions/get-project";
-import { MainContent } from "@/app/main-content";
 import { redirect } from "next/navigation";
+
+const MainContent = dynamic(
+  () => import("@/app/main-content").then((m) => ({ default: m.MainContent })),
+  { ssr: false }
+);
 
 interface PageProps {
   params: Promise<{ projectId: string }>;
