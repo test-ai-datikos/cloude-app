@@ -1,13 +1,8 @@
-import dynamic from "next/dynamic";
 import { getUser } from "@/actions";
 import { getProjects } from "@/actions/get-projects";
 import { createProject } from "@/actions/create-project";
 import { redirect } from "next/navigation";
-
-const MainContent = dynamic(
-  () => import("./main-content").then((m) => ({ default: m.MainContent })),
-  { ssr: false }
-);
+import { MainContentDynamic as MainContent } from "./main-content-dynamic";
 
 export default async function Home() {
   const user = await getUser();
